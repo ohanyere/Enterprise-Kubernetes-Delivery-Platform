@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-go-service-config
+data:
+  APP_ENV: base
+  LOG_LEVEL: info
+  RELEASE_CHANNEL: base
+  APP_VERSION: 0.0.0
+  COMMIT_SHA: replace-me
+  FEATURE_FLAG_EXAMPLE: "false"
