@@ -1,0 +1,82 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: docker.io/ohanyere/sample-go-service
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/sample-go-service/go.mod
+
+      - name: Check gofmt
+        working-directory: apps/sample-go-service
+        run: test -z "$(gofmt -l .)"
+
+      - name: Run go vet
+        working-directory: apps/sample-go-service
+        run: go vet ./...
+
+      - name: Run Go tests
+        working-directory: apps/sample-go-service
+        run: go test ./...
+
+      - name: Scan Dockerfile with Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: Build Docker image
+        run: docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" .
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Build dev manifests
+        run: kustomize build deploy/overlays/dev
+
+      - name: Build staging manifests
+        run: kustomize build deploy/overlays/staging
+
+      - name: Build prod manifests
+        run: kustomize build deploy/overlays/prod
+
+      - name: Scan Kubernetes manifests with Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: deploy
+          framework: kubernetes
+
+      - name: Scan GitHub Actions workflows with Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .github/workflows
+          framework: github_actions
+
+      # TODO: Push the immutable image tag after registry credentials are configured.
+      # TODO: Add a promotion workflow that updates overlay image tags by pull request.
