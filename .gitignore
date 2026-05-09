@@ -1,0 +1,10 @@
+.DS_Store
+*.log
+tmp/
+dist/
+bin/
+coverage.out
+.env
+.env.*
+!.env.example
+.codex
