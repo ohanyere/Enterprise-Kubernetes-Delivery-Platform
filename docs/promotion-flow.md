@@ -31,6 +31,16 @@ ArgoCD watches `deploy/overlays/dev` through the dev Application. Because dev ha
 
 Rollback is done by reverting the Git commit that changed the dev overlay image tag. After the revert is merged or pushed to `main`, ArgoCD syncs dev back to the previous immutable image tag.
 
+## Phase 3: Promote Dev to Staging
+
+Dev receives the image automatically from CI when the `Publish and Promote Dev` workflow builds and publishes a SHA-tagged Docker image, then updates `deploy/overlays/dev/kustomization.yaml`.
+
+Staging promotion is manual. The `Promote Staging` workflow is started with `workflow_dispatch` and copies the exact same immutable `newName` and `newTag` from the dev overlay into `deploy/overlays/staging/kustomization.yaml`.
+
+The workflow does not rebuild the Docker image, create a new tag, or use `latest` for staging. It promotes the artifact that was already tested in dev, proving the build-once-deploy-many model: build one image, then deploy that same image through environments by changing Git.
+
+Rollback is performed by reverting the staging promotion commit. After the revert reaches `main`, GitOps reconciliation returns staging to the previous immutable image tag.
+
 ## Later Phases
 
-Staging and prod are not promoted yet. Future phases can promote the same immutable SHA tag into `deploy/overlays/staging` and `deploy/overlays/prod` with manual approvals. The build-once-deploy-many rule remains the same: build one image, then promote that exact image by changing Git.
+Prod is not promoted yet. A future phase can promote the same immutable SHA tag into `deploy/overlays/prod` with manual approval. The build-once-deploy-many rule remains the same: build one image, then promote that exact image by changing Git.

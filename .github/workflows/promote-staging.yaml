@@ -1,0 +1,63 @@
+name: Promote Staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote-staging:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read dev image
+        uses: mikefarah/yq@v4.44.3
+        with:
+          cmd: >
+            yq -r
+            '.images[] | select(.name == "docker.io/ohanyere/sample-go-service") |
+             "DEV_IMAGE_NAME=\(.newName // "")\nDEV_IMAGE_TAG=\(.newTag // "")"'
+            deploy/overlays/dev/kustomization.yaml >> "$GITHUB_ENV"
+
+      - name: Verify dev image is immutable
+        run: |
+          test -n "${DEV_IMAGE_NAME}"
+          test -n "${DEV_IMAGE_TAG}"
+          test "${DEV_IMAGE_TAG}" != "latest"
+          case "${DEV_IMAGE_TAG}" in
+            sha-*) ;;
+            *)
+              echo "Dev image tag must be an immutable sha-* tag, got: ${DEV_IMAGE_TAG}"
+              exit 1
+              ;;
+          esac
+
+      - name: Update staging overlay image
+        uses: mikefarah/yq@v4.44.3
+        with:
+          cmd: >
+            yq -i
+            '(.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newName) = strenv(DEV_IMAGE_NAME) |
+             (.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newTag) = strenv(DEV_IMAGE_TAG)'
+            deploy/overlays/staging/kustomization.yaml
+
+      - name: Render staging overlay
+        run: kubectl kustomize deploy/overlays/staging
+
+      - name: Commit and push staging promotion
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- deploy/overlays/staging/kustomization.yaml; then
+            echo "No staging promotion changes to commit."
+            exit 0
+          fi
+
+          git add deploy/overlays/staging/kustomization.yaml
+          git commit -m "chore: promote staging to ${DEV_IMAGE_TAG} [skip ci]"
+          git push origin HEAD:main
