@@ -1,0 +1,102 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: sample-go-service
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sample-go-service
+  template:
+    metadata:
+      labels:
+        app: sample-go-service
+        app.kubernetes.io/name: sample-go-service
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+        app.kubernetes.io/version: 0.0.0
+        version: stable
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sample-go-service
+          image: docker.io/ohanyere/sample-go-service:replace-me
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: sample-go-service-config
+            - secretRef:
+                name: sample-go-service-secret
+                optional: true
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+  strategy:
+    canary:
+      stableService: sample-go-service-stable
+      canaryService: sample-go-service-canary
+      trafficRouting:
+        istio:
+          virtualService:
+            name: sample-go-service
+            routes:
+              - primary
+          destinationRule:
+            name: sample-go-service
+            stableSubsetName: stable
+            canarySubsetName: canary
+      steps:
+        # Send a small slice of user traffic to the new ReplicaSet.
+        - setWeight: 10
+        # Pause so operators and future automated analysis can observe early signals.
+        - pause:
+            duration: 2m
+        # Increase exposure after the first health window succeeds.
+        - setWeight: 25
+        # Hold again to catch errors that only appear under more load.
+        - pause:
+            duration: 2m
+        # Move half of traffic to canary for a stronger production signal.
+        - setWeight: 50
+        # Final observation window before full promotion.
+        - pause:
+            duration: 2m
+        # Promote the canary to receive all traffic when health checks pass.
+        - setWeight: 100

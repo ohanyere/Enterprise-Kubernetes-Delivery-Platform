@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: sample-go-service
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+spec:
+  host: sample-go-service
+  trafficPolicy:
+    # ISTIO_MUTUAL enables mesh-managed mutual TLS between services.
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+    # Subsets map traffic to pods by label. Argo Rollouts manages stable/canary
+    # identity while Istio uses these subsets for weighted routing.
+    - name: stable
+      labels:
+        version: stable
+    - name: canary
+      labels:
+        version: canary

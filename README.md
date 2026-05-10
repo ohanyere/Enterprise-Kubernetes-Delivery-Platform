@@ -105,6 +105,16 @@ This phase does not install metrics-server, Karpenter, or Cluster Autoscaler. It
 
 Use `scripts/explain-autoscaling-flow.sh` to print the intended operational scaling flow.
 
+## Progressive Delivery and Traffic Management
+
+Progressive delivery reference manifests live in `progressive-delivery`. Argo Rollouts represents the rollout controller, Istio represents the traffic routing layer, and Prometheus-style metrics represent the future health signal used to continue or abort a canary.
+
+Canary delivery sends a small percentage of traffic to a new version before full promotion. Istio routes traffic between stable and canary destinations, while Argo Rollouts advances weights through controlled steps and can return traffic to stable when a rollout is unhealthy.
+
+This phase does not install Argo Rollouts, Istio, or Prometheus, and it does not replace the current Deployment or change the existing overlays. It documents the future operational model for safer releases and fast rollback.
+
+Use `scripts/explain-progressive-delivery-flow.sh` to print the intended canary flow.
+
 ## Run Locally
 
 ```bash

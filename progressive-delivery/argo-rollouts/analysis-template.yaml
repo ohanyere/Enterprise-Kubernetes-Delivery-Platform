@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: sample-go-service-success-rate
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+spec:
+  metrics:
+    # This is where real production metrics decide whether a rollout continues
+    # or aborts. The address and query are placeholders for a future Prometheus
+    # integration and should be replaced with environment-specific values.
+    - name: success-rate
+      interval: 1m
+      count: 3
+      successCondition: result[0] >= 0.99
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.example.com
+          query: |
+            sum(rate(http_requests_total{service="sample-go-service",status!~"5.."}[2m]))
+            /
+            sum(rate(http_requests_total{service="sample-go-service"}[2m]))

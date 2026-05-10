@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: sample-go-service
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        # Placeholder host for future environment-specific ingress configuration.
+        - sample.example.com

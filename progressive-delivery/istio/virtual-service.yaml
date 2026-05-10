@@ -1,0 +1,32 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: sample-go-service
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+spec:
+  hosts:
+    - sample.example.com
+  gateways:
+    - sample-go-service
+  http:
+    # Argo Rollouts modifies these weights during canary progression.
+    - name: primary
+      match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: sample-go-service
+            subset: stable
+            port:
+              number: 80
+          weight: 100
+        - destination:
+            host: sample-go-service
+            subset: canary
+            port:
+              number: 80
+          weight: 0
