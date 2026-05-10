@@ -115,6 +115,16 @@ This phase does not install Argo Rollouts, Istio, or Prometheus, and it does not
 
 Use `scripts/explain-progressive-delivery-flow.sh` to print the intended canary flow.
 
+## Observability and SLO Readiness
+
+Observability architecture lives in `observability`. Prometheus reference manifests define future scrape and alerting patterns, while Grafana notes describe the dashboards operators need for service health, rollouts, autoscaling, and resource pressure.
+
+SLO documentation connects metrics to user impact. Metrics power alerts and rollout analysis, dashboards help engineers understand service behavior, and runbooks guide response when alerts fire.
+
+This phase does not install Prometheus, Grafana, Loki, Tempo, or Jaeger, and it does not add application instrumentation or a live metrics endpoint. It prepares the operational model that progressive delivery will depend on.
+
+Use `scripts/explain-observability-flow.sh` to print the intended observability flow.
+
 ## Run Locally
 
 ```bash

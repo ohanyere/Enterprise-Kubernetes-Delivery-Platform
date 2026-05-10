@@ -1,0 +1,66 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sample-go-service-alerts
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+    release: prometheus
+spec:
+  groups:
+    # Example alerts only. Real thresholds depend on production traffic,
+    # latency expectations, error budgets, and customer impact.
+    - name: sample-go-service.rules
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            (
+              sum(rate(http_requests_total{service="sample-go-service",status=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{service="sample-go-service"}[5m]))
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: page
+            service: sample-go-service
+          annotations:
+            summary: "sample-go-service has a high 5xx error rate"
+            description: "Error-rate alerts should map to user impact and SLO burn, not arbitrary noise."
+        - alert: HighLatency
+          expr: |
+            histogram_quantile(
+              0.95,
+              sum(rate(http_request_duration_seconds_bucket{service="sample-go-service"}[5m])) by (le)
+            ) > 0.5
+          for: 10m
+          labels:
+            severity: page
+            service: sample-go-service
+          annotations:
+            summary: "sample-go-service p95 latency is elevated"
+            description: "Tune this threshold to real production latency expectations and user impact."
+        - alert: PodRestartingFrequently
+          expr: |
+            increase(kube_pod_container_status_restarts_total{container="sample-go-service"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: ticket
+            service: sample-go-service
+          annotations:
+            summary: "sample-go-service pods are restarting frequently"
+            description: "Frequent restarts can indicate crashes, failed dependencies, memory pressure, or bad configuration."
+        - alert: RolloutCanaryDegraded
+          expr: |
+            (
+              sum(rate(http_requests_total{service="sample-go-service",version="canary",status=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{service="sample-go-service",version="canary"}[5m]))
+            ) > 0.02
+          for: 3m
+          labels:
+            severity: page
+            service: sample-go-service
+          annotations:
+            summary: "sample-go-service canary is degraded"
+            description: "Canary alerts should stop or abort rollout progression before broad user impact."

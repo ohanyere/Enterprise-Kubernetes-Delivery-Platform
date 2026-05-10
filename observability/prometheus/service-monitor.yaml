@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sample-go-service
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+    # Placeholder label commonly used by Prometheus Operator selectors.
+    release: prometheus
+spec:
+  # Prometheus Operator watches ServiceMonitor resources and configures
+  # Prometheus scrape jobs for Services matching this selector.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sample-go-service
+      app.kubernetes.io/component: api
+  namespaceSelector:
+    matchNames:
+      # Placeholder namespace; overlays render the service into environment namespaces.
+      - sample-go-service-prod
+  endpoints:
+    # This assumes a future metrics endpoint is exposed on the existing HTTP port.
+    # The application metrics endpoint is not added in this phase.
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
