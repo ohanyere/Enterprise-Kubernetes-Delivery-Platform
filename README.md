@@ -77,6 +77,14 @@ The initial CI workflow is validation-only. It checks Go formatting, vetting, an
 
 Terraform scanning is intentionally not included because this repository does not contain Terraform yet.
 
+## Policy as Code and Cluster Governance
+
+Kyverno policy definitions live in `policies/kyverno`. They define baseline platform guardrails for immutable images, resource requests and limits, non-root execution, and health probes.
+
+These policies are not installed in this phase. They document and prepare the governance architecture so a future cluster can enforce the same operational standards automatically through admission control.
+
+Use `scripts/test-policies.sh` to render the current overlays and show where the policies would apply once Kyverno is installed.
+
 ## Run Locally
 
 ```bash

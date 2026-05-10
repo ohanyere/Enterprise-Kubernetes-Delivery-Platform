@@ -1,0 +1,37 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-probes
+  annotations:
+    policies.kyverno.io/title: Require Liveness and Readiness Probes
+    policies.kyverno.io/category: Reliability
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Requires health probes so Kubernetes can detect unhealthy containers and
+      route traffic only to workloads that are ready.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    # Without probes, Kubernetes cannot reliably restart unhealthy containers or gate traffic.
+    - name: require-container-probes
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Containers must define both livenessProbe and readinessProbe."
+        pattern:
+          spec:
+            containers:
+              - name: "*"
+                livenessProbe:
+                  httpGet:
+                    path: "?*"
+                    port: "*"
+                readinessProbe:
+                  httpGet:
+                    path: "?*"
+                    port: "*"

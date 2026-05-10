@@ -1,0 +1,33 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+  annotations:
+    policies.kyverno.io/title: Disallow Latest Image Tags
+    policies.kyverno.io/category: Supply Chain
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Prevents workloads from using mutable latest image tags so deployments,
+      rollbacks, and incident investigations remain reproducible.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    # Mutable tags make rollback and incident reconstruction unreliable.
+    - name: disallow-latest-containers
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Images must not use the mutable ':latest' tag. Promote immutable sha-* tags instead."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:latest"
