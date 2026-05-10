@@ -1,0 +1,63 @@
+name: Promote Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote-prod:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read staging image
+        uses: mikefarah/yq@v4.44.3
+        with:
+          cmd: >
+            yq -r
+            '.images[] | select(.name == "docker.io/ohanyere/sample-go-service") |
+             "STAGING_IMAGE_NAME=\(.newName // "")\nSTAGING_IMAGE_TAG=\(.newTag // "")"'
+            deploy/overlays/staging/kustomization.yaml >> "$GITHUB_ENV"
+
+      - name: Verify staging image is immutable
+        run: |
+          test -n "${STAGING_IMAGE_NAME}"
+          test -n "${STAGING_IMAGE_TAG}"
+          test "${STAGING_IMAGE_TAG}" != "latest"
+          case "${STAGING_IMAGE_TAG}" in
+            sha-*) ;;
+            *)
+              echo "Staging image tag must be an immutable sha-* tag, got: ${STAGING_IMAGE_TAG}"
+              exit 1
+              ;;
+          esac
+
+      - name: Update prod overlay image
+        uses: mikefarah/yq@v4.44.3
+        with:
+          cmd: >
+            yq -i
+            '(.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newName) = strenv(STAGING_IMAGE_NAME) |
+             (.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newTag) = strenv(STAGING_IMAGE_TAG)'
+            deploy/overlays/prod/kustomization.yaml
+
+      - name: Render prod overlay
+        run: kubectl kustomize deploy/overlays/prod
+
+      - name: Commit and push production promotion
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- deploy/overlays/prod/kustomization.yaml; then
+            echo "No production promotion changes to commit."
+            exit 0
+          fi
+
+          git add deploy/overlays/prod/kustomization.yaml
+          git commit -m "chore: promote production to ${STAGING_IMAGE_TAG} [skip ci]"
+          git push origin HEAD:main

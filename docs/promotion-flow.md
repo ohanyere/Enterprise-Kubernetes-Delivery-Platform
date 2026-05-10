@@ -41,6 +41,16 @@ The workflow does not rebuild the Docker image, create a new tag, or use `latest
 
 Rollback is performed by reverting the staging promotion commit. After the revert reaches `main`, GitOps reconciliation returns staging to the previous immutable image tag.
 
+## Production Promotion Flow
+
+Production only promotes images that have already been promoted to staging. The `Promote Production` workflow is manual and reads the exact `newName` and `newTag` from `deploy/overlays/staging/kustomization.yaml`, validates that the tag is an immutable `sha-*` tag and not `latest`, and copies those values into `deploy/overlays/prod/kustomization.yaml`.
+
+The workflow does not rebuild the image or create a production-specific tag. This preserves the evidence gathered in lower environments: the artifact that reached production is the same artifact that passed dev and staging.
+
+Rollback is performed by reverting the production promotion commit. Because the desired production image is stored in Git, reverting returns prod to the previous immutable image tag and lets GitOps reconciliation apply that state.
+
+Rebuilding per environment is dangerous because the resulting images can differ even when the source commit is the same. Dependency resolution, base image updates, build cache differences, timestamps, or build tooling changes can create a production artifact that staging never tested. Promotion should move a known artifact, not recreate one.
+
 ## Later Phases
 
-Prod is not promoted yet. A future phase can promote the same immutable SHA tag into `deploy/overlays/prod` with manual approval. The build-once-deploy-many rule remains the same: build one image, then promote that exact image by changing Git.
+Future phases can add progressive delivery controllers and traffic management while keeping the same build-once-deploy-many rule: build one image, then promote that exact image by changing Git.

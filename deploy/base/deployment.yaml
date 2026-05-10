@@ -4,19 +4,33 @@ metadata:
   name: sample-go-service
   labels:
     app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
     app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+    app.kubernetes.io/version: 0.0.0
 spec:
   replicas: 1
+  revisionHistoryLimit: 5 # Keeps recent ReplicaSets available for fast rollback after a bad rollout.
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0 # Keeps all current capacity serving while replacement pods become ready.
+      maxSurge: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: sample-go-service
   template:
     metadata:
       labels:
+        app: sample-go-service
         app.kubernetes.io/name: sample-go-service
+        app.kubernetes.io/component: api
         app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+        app.kubernetes.io/version: 0.0.0
+        version: stable
     spec:
       automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30 # Gives the app time to finish in-flight requests before pod termination.
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532

@@ -4,10 +4,13 @@ metadata:
   name: sample-go-service
   labels:
     app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+    app.kubernetes.io/version: 0.0.0
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: sample-go-service
+    app: sample-go-service
   ports:
     - name: http
       port: 80
