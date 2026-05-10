@@ -47,6 +47,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: sample-go-service-config
+            # Pods consume a normal Kubernetes Secret at runtime.
+            # External Secrets Operator creates and refreshes this Secret automatically.
+            # AWS Secrets Manager remains the source of truth for the sensitive values.
             - secretRef:
                 name: sample-go-service-secret
                 optional: true
