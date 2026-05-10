@@ -1,0 +1,34 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sample-go-service
+  labels:
+    app.kubernetes.io/name: sample-go-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: enterprise-kubernetes-delivery-platform
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sample-go-service
+  # HPA scales pods so the service can absorb changing request volume without
+  # requiring a manual deployment during a traffic spike.
+  minReplicas: 2
+  # A ceiling prevents runaway scaling caused by bad metrics, dependency
+  # failure, request storms, or application bugs.
+  maxReplicas: 10
+  metrics:
+    # CPU and memory utilization are calculated against container requests.
+    # Accurate requests are required or HPA decisions become misleading.
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75

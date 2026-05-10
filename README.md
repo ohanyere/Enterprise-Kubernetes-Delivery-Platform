@@ -95,6 +95,16 @@ This phase does not install External Secrets Operator, IRSA, Vault, or the CSI S
 
 Use `scripts/explain-secret-flow.sh` to print the intended operational flow.
 
+## Elastic Autoscaling Architecture
+
+HPA architecture lives in `autoscaling/hpa`. Horizontal Pod Autoscaler scales application pods based on CPU and memory pressure, while Karpenter readiness covers future node provisioning when the scheduler cannot place new pods.
+
+HPA reacts to application pressure by changing replica counts. Karpenter reacts to unschedulable workload demand by adding suitable node capacity. Together, they help maintain reliability during traffic spikes while avoiding permanent over-provisioning.
+
+This phase does not install metrics-server, Karpenter, or Cluster Autoscaler. It documents the pod-scaling and node-scaling model and provides a sample HPA manifest for future integration.
+
+Use `scripts/explain-autoscaling-flow.sh` to print the intended operational scaling flow.
+
 ## Run Locally
 
 ```bash
