@@ -125,6 +125,16 @@ This phase does not install Prometheus, Grafana, Loki, Tempo, or Jaeger, and it 
 
 Use `scripts/explain-observability-flow.sh` to print the intended observability flow.
 
+## Operational Readiness and Validation
+
+Operational validation guidance lives in `operations`. The validation checklist covers GitHub Actions workflows, Kustomize overlays, promotion flows, Kyverno policies, external secrets, HPA, Argo Rollouts, Istio, and observability.
+
+Incident runbooks live in `operations/incidents` and document response patterns for failed canary rollouts, image promotion failures, HPA scaling failures, and secrets sync failures.
+
+Day-2 operations documentation lives in `docs`. It explains the complete platform architecture, production readiness expectations, ongoing maintenance, upgrades, policy evolution, incident response, and operational ownership.
+
+Use `scripts/validate-platform-foundation.sh` to print the operational validation sequence. It is explanatory only and does not install anything live or modify current overlays and promotion flows.
+
 ## Run Locally
 
 ```bash
