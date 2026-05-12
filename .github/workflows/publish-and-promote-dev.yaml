@@ -113,4 +113,5 @@ jobs:
 
           git add deploy/overlays/dev/kustomization.yaml
           git commit -m "chore: promote dev to sha-${GITHUB_SHA} [skip ci]"
+          git pull --rebase origin main
           git push origin HEAD:main
