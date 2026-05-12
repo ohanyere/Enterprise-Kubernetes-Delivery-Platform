@@ -13,7 +13,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: docker.io/kuperpull/sample-go-service
+      IMAGE_NAME: docker.io/kuberpull/sample-go-service
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout

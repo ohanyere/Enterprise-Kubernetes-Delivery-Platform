@@ -332,7 +332,7 @@ Build once deploy many means that the platform builds one artifact and promotes 
 In this repository, the intended artifact is the sample service container image. The publishing workflow tags it with an immutable Git SHA:
 
 ```text
-docker.io/kuperpull/sample-go-service:sha-${GITHUB_SHA}
+docker.io/kuberpull/sample-go-service:sha-${GITHUB_SHA}
 ```
 
 That image is then promoted by updating Kustomize overlay image fields:
@@ -394,8 +394,8 @@ Dev overlay:
 
 ```yaml
 images:
-  - name: docker.io/kuperpull/sample-go-service
-    newName: docker.io/kuperpull/sample-go-service
+  - name: docker.io/kuberpull/sample-go-service
+    newName: docker.io/kuberpull/sample-go-service
     newTag: replace-me
 ```
 
@@ -485,8 +485,8 @@ What it does:
 - Renders the dev overlay.
 - Logs in to the configured registry.
 - Builds and pushes:
-  - `docker.io/kuperpull/sample-go-service:sha-${GITHUB_SHA}`
-  - `docker.io/kuperpull/sample-go-service:latest`
+  - `docker.io/kuberpull/sample-go-service:sha-${GITHUB_SHA}`
+  - `docker.io/kuberpull/sample-go-service:latest`
 - Updates `deploy/overlays/dev/kustomization.yaml` to point at `sha-${GITHUB_SHA}`.
 - Commits the dev promotion back to `main`.
 

@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE_NAME: docker.io/kuperpull/sample-go-service
+  IMAGE_NAME: docker.io/kuberpull/sample-go-service
 
 jobs:
   validate-before-release:
@@ -90,8 +90,8 @@ jobs:
         with:
           cmd: >
             yq -i
-            '(.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newName) = strenv(IMAGE_NAME) |
-             (.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newTag) = "sha-" + strenv(GITHUB_SHA)'
+            '(.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(IMAGE_NAME) |
+             (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = "sha-" + strenv(GITHUB_SHA)'
             deploy/overlays/dev/kustomization.yaml
 
       - name: Commit and push dev promotion

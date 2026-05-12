@@ -39,7 +39,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: sample-go-service
-          image: docker.io/kuperpull/sample-go-service:replace-me
+          image: docker.io/kuberpull/sample-go-service:replace-me
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

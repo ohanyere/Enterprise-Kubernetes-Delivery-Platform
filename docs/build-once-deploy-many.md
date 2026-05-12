@@ -11,7 +11,7 @@ Environment differences belong in Kubernetes configuration:
 The expected flow is:
 
 1. CI tests the service.
-2. CI builds `docker.io/kuperpull/sample-go-service:<commit-sha>`.
+2. CI builds `docker.io/kuberpull/sample-go-service:<commit-sha>`.
 3. CI pushes that immutable tag after registry publishing is enabled.
 4. A promotion pull request updates the target overlay image tag.
 5. ArgoCD syncs the environment from Git.

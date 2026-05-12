@@ -19,7 +19,7 @@ jobs:
         with:
           cmd: >
             yq -r
-            '.images[] | select(.name == "docker.io/kuperpull/sample-go-service") |
+            '.images[] | select(.name == "docker.io/kuberpull/sample-go-service") |
              "STAGING_IMAGE_NAME=\(.newName // "")\nSTAGING_IMAGE_TAG=\(.newTag // "")"'
             deploy/overlays/staging/kustomization.yaml >> "$GITHUB_ENV"
 
@@ -41,8 +41,8 @@ jobs:
         with:
           cmd: >
             yq -i
-            '(.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newName) = strenv(STAGING_IMAGE_NAME) |
-             (.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newTag) = strenv(STAGING_IMAGE_TAG)'
+            '(.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(STAGING_IMAGE_NAME) |
+             (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = strenv(STAGING_IMAGE_TAG)'
             deploy/overlays/prod/kustomization.yaml
 
       - name: Render prod overlay

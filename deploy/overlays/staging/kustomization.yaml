@@ -12,5 +12,5 @@ configMapGenerator:
     envs:
       - configmap.yaml
 images:
-  - name: docker.io/kuperpull/sample-go-service
+  - name: docker.io/kuberpull/sample-go-service
     newTag: replace-me
