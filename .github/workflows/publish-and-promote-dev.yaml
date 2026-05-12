@@ -85,14 +85,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Update dev overlay image
-        uses: mikefarah/yq@v4.44.3
-        with:
-          cmd: >
-            yq -i
-            '(.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(IMAGE_NAME) |
-             (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = "sha-" + strenv(GITHUB_SHA)'
-            deploy/overlays/dev/kustomization.yaml
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Promote dev image tag
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          IMAGE_TAG: sha-${{ github.sha }}
+        run: |
+          yq -i '
+          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(IMAGE_NAME) |
+          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = strenv(IMAGE_TAG)
+          ' deploy/overlays/dev/kustomization.yaml
 
       - name: Commit and push dev promotion
         run: |

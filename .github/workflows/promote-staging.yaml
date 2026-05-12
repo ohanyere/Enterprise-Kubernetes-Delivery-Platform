@@ -14,14 +14,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Read dev image
-        uses: mikefarah/yq@v4.44.3
-        with:
-          cmd: >
-            yq -r
-            '.images[] | select(.name == "docker.io/kuberpull/sample-go-service") |
-             "DEV_IMAGE_NAME=\(.newName // "")\nDEV_IMAGE_TAG=\(.newTag // "")"'
-            deploy/overlays/dev/kustomization.yaml >> "$GITHUB_ENV"
+        run: |
+          yq -r '
+          .images[] | select(.name == "docker.io/kuberpull/sample-go-service") |
+          "DEV_IMAGE_NAME=\(.newName // "")\nDEV_IMAGE_TAG=\(.newTag // "")"
+          ' deploy/overlays/dev/kustomization.yaml >> "$GITHUB_ENV"
 
       - name: Verify dev image is immutable
         run: |
@@ -37,13 +41,11 @@ jobs:
           esac
 
       - name: Update staging overlay image
-        uses: mikefarah/yq@v4.44.3
-        with:
-          cmd: >
-            yq -i
-            '(.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(DEV_IMAGE_NAME) |
-             (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = strenv(DEV_IMAGE_TAG)'
-            deploy/overlays/staging/kustomization.yaml
+        run: |
+          yq -i '
+          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(DEV_IMAGE_NAME) |
+          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = strenv(DEV_IMAGE_TAG)
+          ' deploy/overlays/staging/kustomization.yaml
 
       - name: Render staging overlay
         run: kubectl kustomize deploy/overlays/staging
