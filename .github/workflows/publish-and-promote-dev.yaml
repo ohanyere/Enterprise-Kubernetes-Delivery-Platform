@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE_NAME: ${{ secrets.CONTAINER_REGISTRY }}/${{ secrets.CONTAINER_REGISTRY_USERNAME }}/${{ secrets.CONTAINER_IMAGE }}
+  IMAGE_NAME: docker.io/kuperpull/sample-go-service
 
 jobs:
   validate-before-release:
@@ -22,12 +22,10 @@ jobs:
         env:
           CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
           CONTAINER_REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-          CONTAINER_IMAGE: ${{ secrets.CONTAINER_IMAGE }}
           CONTAINER_REGISTRY_TOKEN: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
         run: |
           test -n "${CONTAINER_REGISTRY}"
           test -n "${CONTAINER_REGISTRY_USERNAME}"
-          test -n "${CONTAINER_IMAGE}"
           test -n "${CONTAINER_REGISTRY_TOKEN}"
 
       - name: Set up Go
@@ -92,8 +90,8 @@ jobs:
         with:
           cmd: >
             yq -i
-            '(.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newName) = strenv(IMAGE_NAME) |
-             (.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newTag) = "sha-" + strenv(GITHUB_SHA)'
+            '(.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newName) = strenv(IMAGE_NAME) |
+             (.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newTag) = "sha-" + strenv(GITHUB_SHA)'
             deploy/overlays/dev/kustomization.yaml
 
       - name: Commit and push dev promotion

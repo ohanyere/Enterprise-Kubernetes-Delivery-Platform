@@ -20,8 +20,8 @@ The workflow updates `deploy/overlays/dev/kustomization.yaml`:
 
 ```yaml
 images:
-  - name: docker.io/ohanyere/sample-go-service
-    newName: <registry>/<username>/<image>
+  - name: docker.io/kuperpull/sample-go-service
+    newName: docker.io/kuperpull/sample-go-service
     newTag: sha-<git-commit-sha>
 ```
 

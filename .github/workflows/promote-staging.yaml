@@ -19,7 +19,7 @@ jobs:
         with:
           cmd: >
             yq -r
-            '.images[] | select(.name == "docker.io/ohanyere/sample-go-service") |
+            '.images[] | select(.name == "docker.io/kuperpull/sample-go-service") |
              "DEV_IMAGE_NAME=\(.newName // "")\nDEV_IMAGE_TAG=\(.newTag // "")"'
             deploy/overlays/dev/kustomization.yaml >> "$GITHUB_ENV"
 
@@ -41,8 +41,8 @@ jobs:
         with:
           cmd: >
             yq -i
-            '(.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newName) = strenv(DEV_IMAGE_NAME) |
-             (.images[] | select(.name == "docker.io/ohanyere/sample-go-service") | .newTag) = strenv(DEV_IMAGE_TAG)'
+            '(.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newName) = strenv(DEV_IMAGE_NAME) |
+             (.images[] | select(.name == "docker.io/kuperpull/sample-go-service") | .newTag) = strenv(DEV_IMAGE_TAG)'
             deploy/overlays/staging/kustomization.yaml
 
       - name: Render staging overlay

@@ -29,7 +29,7 @@ The same image tag should move from dev to staging to prod. Do not rebuild the s
 The base image placeholder is:
 
 ```text
-docker.io/ohanyere/sample-go-service:replace-me
+docker.io/kuperpull/sample-go-service:replace-me
 ```
 
 Each overlay has an `images` block ready for promotion by replacing `newTag` with an immutable tag such as a Git commit SHA.
@@ -160,7 +160,7 @@ curl http://localhost:8080/config
 ## Build Docker Image
 
 ```bash
-docker build -t docker.io/ohanyere/sample-go-service:local .
+docker build -t docker.io/kuperpull/sample-go-service:local .
 ```
 
 ## Render Manifests
