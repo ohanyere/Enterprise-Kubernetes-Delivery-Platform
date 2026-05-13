@@ -23,22 +23,20 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
           yq --version
 
-      - name: Read dev image
+      - name: Read promoted image
         run: |
-          yq -r '
-          .images[] | select(.name == "docker.io/kuberpull/sample-go-service") |
-          "DEV_IMAGE_NAME=\(.newName // "")\nDEV_IMAGE_TAG=\(.newTag // "")"
-          ' deploy/overlays/dev/kustomization.yaml >> "$GITHUB_ENV"
+          echo "IMAGE_NAME=$(yq '.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName' deploy/overlays/dev/kustomization.yaml)" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=$(yq '.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag' deploy/overlays/dev/kustomization.yaml)" >> "$GITHUB_ENV"
 
       - name: Verify dev image is immutable
         run: |
-          test -n "${DEV_IMAGE_NAME}"
-          test -n "${DEV_IMAGE_TAG}"
-          test "${DEV_IMAGE_TAG}" != "latest"
-          case "${DEV_IMAGE_TAG}" in
+          test -n "${IMAGE_NAME}"
+          test -n "${IMAGE_TAG}"
+          test "${IMAGE_TAG}" != "latest"
+          case "${IMAGE_TAG}" in
             sha-*) ;;
             *)
-              echo "Dev image tag must be an immutable sha-* tag, got: ${DEV_IMAGE_TAG}"
+              echo "Dev image tag must be an immutable sha-* tag, got: ${IMAGE_TAG}"
               exit 1
               ;;
           esac
@@ -46,8 +44,8 @@ jobs:
       - name: Update staging overlay image
         run: |
           yq -i '
-          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(DEV_IMAGE_NAME) |
-          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = strenv(DEV_IMAGE_TAG)
+          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newName) = strenv(IMAGE_NAME) |
+          (.images[] | select(.name == "docker.io/kuberpull/sample-go-service") | .newTag) = strenv(IMAGE_TAG)
           ' deploy/overlays/staging/kustomization.yaml
 
       - name: Render staging overlay
@@ -64,6 +62,6 @@ jobs:
           fi
 
           git add deploy/overlays/staging/kustomization.yaml
-          git commit -m "chore: promote staging to ${DEV_IMAGE_TAG} [skip ci]"
+          git commit -m "chore: promote staging to ${IMAGE_TAG} [skip ci]"
           git pull --rebase origin main
           git push origin HEAD:main
