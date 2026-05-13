@@ -6,6 +6,90 @@ Purpose: This document is the master architecture handbook, operational referenc
 
 This repository is intentionally architecture-first. The sample service is small so the project can focus on enterprise delivery mechanics: immutable builds, environment promotion, GitOps reconciliation, policy-as-code, externalized secrets, autoscaling, progressive delivery, service mesh routing, observability, rollback, and Day-2 operational response.
 
+## Documentation Hierarchy
+
+`docs/COMPLETE_SYSTEM_OVERVIEW.md` is the authoritative architecture handbook for this repository. It should be treated as the first place to update when the platform architecture, runtime integration plan, operational model, or folder-level responsibilities change.
+
+The focused documents under `docs/` and `operations/` are supporting references. They provide implementation-specific deep dives, operational checklists, runbooks, and narrower explanations for individual platform concerns such as promotion, Kyverno, External Secrets, autoscaling, progressive delivery, observability, and incident response.
+
+This hierarchy prevents documentation drift:
+
+- Update this handbook first when a platform capability changes at the architectural or operational level.
+- Update focused documents when the implementation details, validation commands, or runbook steps for a specific capability change.
+- Keep the README as the concise project entry point, not the full source of architectural truth.
+- Avoid creating additional master architecture documents unless this handbook is intentionally retired.
+
+Future runtime integration work should update this handbook first so the repository continues to have one authoritative view of what is implemented, what is planned, what is installed, and what remains architecture-only.
+
+## Repository Learning Path
+
+The recommended order for understanding the platform is:
+
+1. `README.md`
+2. `docs/COMPLETE_SYSTEM_OVERVIEW.md`
+3. `docs/build-once-deploy-many.md`
+4. `docs/promotion-flow.md`
+5. `docs/policy-as-code.md`
+6. `docs/external-secrets-architecture.md`
+7. `docs/autoscaling-architecture.md`
+8. `docs/progressive-delivery.md`
+9. `docs/observability-architecture.md`
+10. `docs/operational-readiness.md`
+
+This order matters because the platform is easier to understand from the outside in. The README gives the project purpose and current scope. This handbook then explains the complete system, including how repository structure, CI, GitOps, controllers, runtime manifests, and operations fit together.
+
+After that, the focused documents should be read in the order a release moves through the platform: immutable artifact creation, image promotion, governance, secrets, scaling, progressive delivery, observability, and readiness. That sequence mirrors the operational lifecycle of a production delivery platform instead of presenting the docs as isolated topics.
+
+## Runtime Integration Readiness
+
+This repository is architecture-ready, but it is not yet runtime-complete. It contains desired-state manifests, workflow logic, policy definitions, reference integrations, and operational guidance. A live cluster still needs the controllers and supporting systems that make those manifests active.
+
+Architecturally implemented:
+
+- Promotion workflows.
+- Immutable image strategy.
+- Dev, staging, and prod overlays.
+- Kyverno policies.
+- External Secrets manifests.
+- HPA manifests.
+- Argo Rollouts manifests.
+- Istio manifests.
+- Observability manifests.
+
+Not yet installed:
+
+- ArgoCD controller.
+- Kyverno controller.
+- External Secrets Operator.
+- metrics-server.
+- Prometheus/Grafana stack.
+- Argo Rollouts controller.
+- Istio control plane.
+- Karpenter.
+
+This distinction is important during reviews and interviews. The repository demonstrates the target operating model and the desired-state architecture, while the runtime roadmap later in this handbook describes the installation and validation path required to activate those capabilities in a real cluster.
+
+## Platform Engineering Interview Readiness
+
+This project demonstrates a platform engineering approach to Kubernetes delivery rather than a simple application deployment. It shows how an organization can build once, promote through Git, reconcile desired state with ArgoCD, enforce standards with policy-as-code, externalize secrets, prepare autoscaling, design progressive delivery, and connect observability to operational decisions.
+
+The operational knowledge proven by this repository includes:
+
+- Artifact immutability and promotion safety.
+- GitOps desired-state management.
+- Kustomize environment modeling.
+- Admission control and governance.
+- Secret synchronization and rotation readiness.
+- Pod and node autoscaling responsibilities.
+- Canary delivery and traffic-shifting concepts.
+- Metrics, alerts, dashboards, and SLO readiness.
+- Rollback by Git revert and rollout abort.
+- Incident response and Day-2 ownership.
+
+The enterprise concepts covered include separation of build and deploy, environment promotion, auditability, least privilege, runtime policy enforcement, controller-based reconciliation, progressive exposure of risk, observability-driven release decisions, and documented operational recovery paths.
+
+The Day-2 skills modeled here are the skills required after the first successful deployment: validating workflows and overlays, tuning policies, responding to incidents, practicing rollback, evolving runbooks, planning controller upgrades, improving dashboards, testing autoscaling assumptions, and keeping architecture documentation aligned with the running platform.
+
 ## 1. Project Overview
 
 The Enterprise Kubernetes Delivery Platform is a production-style Kubernetes delivery platform template. It demonstrates how an organization can move application code from source control to a Kubernetes runtime through a controlled, auditable, repeatable delivery system.
@@ -1877,7 +1961,7 @@ Fast rollback reduces user impact and gives engineers room to investigate calmly
 
 ## 15. Repository Folder and File Map
 
-This section maps the repository so future engineers, AI systems, maintainers, interview preparation sessions, and runtime integration work can quickly understand where each platform concern lives.
+This section maps the repository so future engineers, maintainers, interview preparation sessions, and runtime integration work can quickly understand where each platform concern lives.
 
 ### `apps/`
 
@@ -2329,56 +2413,5 @@ What each script explains or validates:
 How scripts support learning and operations:
 
 - New engineers can run them to understand flows.
-- AI systems can read them as compact operational explanations.
+- Automation and review tooling can read them as compact operational explanations.
 - Operators can use them as preflight mental checklists before deeper validation.
-
-## Return Summary
-
-### Sections Created
-
-This master handbook includes:
-
-1. Project Overview
-2. High-Level Platform Architecture
-3. Build Once Deploy Many
-4. GitHub Actions CI/CD Architecture
-5. ArgoCD GitOps Architecture
-6. Kyverno Policy Architecture
-7. External Secrets Architecture
-8. Autoscaling Architecture
-9. Progressive Delivery Architecture
-10. Observability Architecture
-11. Operational Validation and Incident Response
-12. Runtime Integration Status
-13. Runtime Integration Roadmap
-14. Operational Lessons Learned
-15. Repository Folder and File Map
-
-### Architecture Coverage Summary
-
-The document covers the complete platform flow from developer change through CI, immutable image creation, registry storage, Kustomize overlay promotion, ArgoCD reconciliation, Kubernetes runtime behavior, Kyverno admission governance, External Secrets synchronization, HPA pod scaling, Karpenter node scaling readiness, Argo Rollouts canary delivery, Istio traffic routing, Prometheus/Grafana observability, and operational validation.
-
-### Operational Systems Covered
-
-Operational systems covered include:
-
-- CI validation.
-- Artifact immutability.
-- GitOps reconciliation.
-- Drift detection.
-- Runtime admission policy.
-- Secret synchronization.
-- Pod autoscaling.
-- Node provisioning readiness.
-- Progressive delivery.
-- Traffic routing.
-- Metrics and alerting.
-- Dashboarding.
-- SLO readiness.
-- Rollback.
-- Incident response.
-- Day-2 operations.
-
-### Runtime Integration Readiness Summary
-
-The repository is ready as a platform architecture foundation. It contains desired-state manifests, workflows, policies, and operational guidance. It still requires live installation and configuration of ArgoCD, Kyverno, External Secrets Operator, metrics-server, Prometheus/Grafana, Karpenter, Argo Rollouts, Istio, logging/tracing systems, runtime credentials, CRDs, RBAC, and live validation before it becomes a fully active production delivery platform.
