@@ -1912,7 +1912,7 @@ What lives here: Container build definition.
 
 The Dockerfile:
 
-- Uses `golang:1.22-alpine` as build stage.
+- Uses `golang:1.25` as build stage.
 - Downloads Go dependencies.
 - Builds a static Linux binary.
 - Uses `gcr.io/distroless/static-debian12:nonroot` for runtime.

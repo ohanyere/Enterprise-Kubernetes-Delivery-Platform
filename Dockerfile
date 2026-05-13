@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS build
+FROM golang:1.25 AS builder
 
 WORKDIR /src
 
@@ -12,7 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o
 FROM gcr.io/distroless/static-debian12:nonroot
 
 WORKDIR /
-COPY --from=build /out/sample-go-service /sample-go-service
+COPY --from=builder /out/sample-go-service /sample-go-service
 
 USER nonroot:nonroot
 EXPOSE 8080
