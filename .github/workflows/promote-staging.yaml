@@ -3,6 +3,9 @@ name: Promote Staging
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   promote-staging:
     runs-on: ubuntu-latest
