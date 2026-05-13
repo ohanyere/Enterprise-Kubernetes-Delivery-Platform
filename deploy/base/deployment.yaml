@@ -2,6 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sample-go-service
+  annotations:
+    checkov.io/skip1: CKV_K8S_15=IfNotPresent is intentional with immutable sha-* promotion tags; mutable latest is not used for promoted environments.
+    checkov.io/skip2: CKV_K8S_35=The current service consumes runtime config from Kubernetes Secret env vars; file/CSI projection is planned for a later secrets integration phase.
+    checkov.io/skip3: CKV_K8S_43=Digest promotion requires registry digest capture in the release workflow; current phase enforces immutable sha-* tags and forbids latest.
   labels:
     app.kubernetes.io/name: sample-go-service
     app.kubernetes.io/component: api
