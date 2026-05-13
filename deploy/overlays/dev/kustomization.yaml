@@ -14,4 +14,4 @@ configMapGenerator:
 images:
   - name: docker.io/kuberpull/sample-go-service
     newName: docker.io/kuberpull/sample-go-service
-    newTag: sha-5f19e10fe41091b5f5549bca29bc7a5241244246
+    newTag: sha-51044984029ff249fe57f8a18d2cdb6652158c45
