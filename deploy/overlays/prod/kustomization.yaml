@@ -13,4 +13,5 @@ configMapGenerator:
       - configmap.yaml
 images:
   - name: docker.io/kuberpull/sample-go-service
-    newTag: replace-me
+    newTag: sha-5f19e10fe41091b5f5549bca29bc7a5241244246
+    newName: docker.io/kuberpull/sample-go-service
